@@ -2,6 +2,14 @@
 
 # by Nilson Pena <nilsonpena@gmail.com>
 
+if [ -z $1 ]
+	then
+	echo "Backup abortado!!!"
+	echo "É preciso especificar o arquivo de configuração como parâmetro"
+	echo "ex.: sh bkputil.sh bkp.conf"
+   exit
+fi
+
 # Armazena o arquivo onde o script está salvo
 DIR_SCRIPT=$(dirname $0)
 # Coloca o path no nome do arquivo passado como parâmetro
@@ -46,6 +54,8 @@ MES=$(date +%m)
 
 # ======================================================================
 # Função que escreve uma entrada no arquivo de log dentro da pasta logs
+# no formato yyyy-mm-dd hh:mm:ss | texto do log
+# ToLog "Mensagem que será armazenada no log"
 # ======================================================================
 ToLog() {
 echo "$(date +%F' '%T) | $1" >> $LOG
@@ -67,7 +77,7 @@ if [ -d $DIR_SCRIPT ] && [ -d $DIR_LOG ] && [ -e $LISTA_BACKUP ] && [ -e $NAO_FA
 	ToLog "Encontrados os arquivos e diretórios essenciais para o script" 
 	return 0
 	else
-	MSG="ERRO! Algum(ns) arquivo(s) e diretório(s) não foi(ram) encontrado(s): $DIR_SCRIPT $DIR_LOG $LISTA_BACKUP $NAO_FAZER_BACKUP O Backup foi abortado"
+	MSG="ERRO! Algum(ns) arquivo(s) e diretório(s) não foi(ram) encontrado(s): $DIR_SCRIPT $DIR_LOG $LISTA_BACKUP $NAO_FAZER_BACKUP. O Backup foi abortado"
 	ToLog "$MSG" 
 	EnviarEmail "ERRO: Backup abortado no servidor $NOME_SERVIDOR" "$MSG" 
 	exit
