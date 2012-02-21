@@ -2,18 +2,18 @@
 
 # by Nilson Pena <nilsonpena@gmail.com>
 
-if [ -z $1 ]
-	then
-	echo "Backup abortado!!!"
-	echo "É preciso especificar o arquivo de configuração como parâmetro"
-	echo "ex.: sh bkputil.sh bkp.conf"
-   exit
-fi
-
 # Armazena o arquivo onde o script está salvo
 DIR_SCRIPT=$(dirname $0)
 # Coloca o path no nome do arquivo passado como parâmetro
 CONFIG_FILE="$DIR_SCRIPT/$1"
+
+# garante que o script foi inicializado com um parâmetro de configuração existente
+if [ ! -e $CONFIG_FILE ] || [ -n $1 ]
+	then
+		echo "Parâmetro inexistente ou nulo. Backup abortado"			
+		exit
+fi
+
 # Remove a extenção do arquivo de configuração, guardando apenas a parte principal do nome
 CONFIG_NAME=$(echo $1 | cut -f1 -d.)
 
