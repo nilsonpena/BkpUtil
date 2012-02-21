@@ -70,12 +70,12 @@ echo "$(date +%F' '%T) | $1" >> $LOG
 # o funcionamento do script existem
 # ======================================================================
 CheckInicial() {
-if [ -d $DIR_SCRIPT ] && [ -d $DIR_LOG ] && [ -e $LISTA_BACKUP ] && [ -e $NAO_FAZER_BACKUP ]
+if [ -d $DIR_SCRIPT ] && [ -d $DIR_LOG ] && [ -e $LISTA_BACKUP ] && [ -e $NAO_FAZER_BACKUP ] && [ -d $HD ] && [ -d $DISPOSITIVO ]
 	then
 	ToLog "Encontrados os arquivos e diretórios essenciais para o script" 
 	return 0
 	else
-	MSG="ERRO! Algum(ns) arquivo(s) e diretório(s) não foi(ram) encontrado(s): $DIR_SCRIPT $DIR_LOG $LISTA_BACKUP $NAO_FAZER_BACKUP. O Backup foi abortado"
+	MSG="ERRO! Algum(ns) arquivo(s) e diretório(s) não foi(ram) encontrado(s): $DIR_SCRIPT $DIR_LOG $LISTA_BACKUP $NAO_FAZER_BACKUP $HD $DISPOSITIVO. O Backup foi abortado"
 	ToLog "$MSG" 
 	EnviarEmail "ERRO: Backup abortado no servidor $NOME_SERVIDOR" "$MSG" 
 	exit
@@ -235,7 +235,7 @@ ToLog "Criado arquivo de Backup $NOME_ARQUIVO"
 EmailLog $NOME_ARQUIVO
 
 # Desmonta o HD
-#Desmonta
+Desmonta
 
 }
 # ======================================================================
