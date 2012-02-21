@@ -65,8 +65,6 @@ echo "$(date +%F' '%T) | $1" >> $LOG
 # ======================================================================
 
 
-
-
 # ======================================================================
 # Função que verifica se todos os arquivos e diretórios essenciais para
 # o funcionamento do script existem
@@ -85,7 +83,7 @@ fi
 }
 
 # ======================================================================
-# Função que checa se é o um diretório permite escrita
+# Função que checa se um diretório permite escrita
 # ======================================================================
 CheckWrite() {
 touch "$1/write.test" 2>> $LOG
