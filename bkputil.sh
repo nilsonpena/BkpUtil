@@ -21,17 +21,27 @@ QTD_CHAVES=${#CHAVES[*]}
 			# Seta os valores vindos do arquivo de configuração nas variáveis que vão ser utilizadas no script
                         eval ${CHAVES[$i]}=\"$(cat $CONFIG_FILE | egrep ^${CHAVES[$i]} | cut -f2 -d\")\"
                 done
-# Seta o local e o nome do arquivo de LOG. No caso será no diretório do arquivo
+# Seta o local e o nome do arquivo de LOG.
+# No caso será no diretório do arquivo
 DIR_LOG="$DIR_SCRIPT/logs"
+# O nome do arquivo de log será nome do arquivo .conf concatenado com YYYY-MM.log
 LOG="$DIR_LOG/$CONFIG_NAME.$(date +%Y-%m).log"
-
+# Seta o nome e local do arquivo de controle incremental. Sera nome do .conf concatenado
+# com a extensão .inc
 CONTROLE_INCREMENTAL="$DIR_SCRIPT/$CONFIG_NAME.inc"
+# Coloca o path do arquivo .list como sendo o path do script, obrigando o usuário a salvar o arquivo
+# na pasta do script
 LISTA_BACKUP="$DIR_SCRIPT/$LISTA_BACKUP"
+# Coloca o path do arquivo .excluded.list como sendo o path do script, obrigando o usuário a salvar o arquivo
+# na pasta do script
 NAO_FAZER_BACKUP="$DIR_SCRIPT/$NAO_FAZER_BACKUP"
+# Coloca path da pasta onde será armazenado o backup a raíz do HD USB
 LOCAL_BACKUP="$HD/$LOCAL_BACKUP"
+# Seta o prefixo e path que será concatenado com os arquivos .full.tar.gz e inc.tar.gz
 PREFIXO_ARQUIVO="$LOCAL_BACKUP/$(date +%Y-%m-%d_%A)"
-
+# Ano atual com 4 dígitos
 ANO=$(date +%Y)
+# Mês atual com 2 dígitos
 MES=$(date +%m)
 
 # ======================================================================
