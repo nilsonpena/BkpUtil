@@ -185,22 +185,20 @@ LOG_MAIL="$DIR_LOG/$CONFIG_NAME.mail.$(date +%F_%H_%M_%S).log"
 echo "Backup realizado em $(date +%F' '%T)" >> $LOG_MAIL
 
 echo "= = = = = = = = = = = = = = = = = = = = = = = = =" >> $LOG_MAIL
-echo "Conteudo do arquivo $NOME_ARQUIVO" >> $LOG_MAIL
-tar -tzf $NOME_ARQUIVO >> $LOG_MAIL
-
-echo " "
-
-echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" >> $LOG_MAIL
-echo "Conteudo do diretorio $LOCAL_BACKUP" >> $LOG_MAIL
-ls -Rlha $LOCAL_BACKUP >> $LOG_MAIL
-
-echo " "
-
-echo "= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =" >> $LOG_MAIL
 echo "Status das partições do servidor $NOME_SERVIDOR" >> $LOG_MAIL
 df -h >> $LOG_MAIL
-
 echo " "
+
+echo "= = = = = = = = = = = = = = = = = = = = = = = = = =" >> $LOG_MAIL
+echo "Conteudo do diretorio $LOCAL_BACKUP" >> $LOG_MAIL
+ls -Rlha $LOCAL_BACKUP >> $LOG_MAIL
+echo " "
+
+echo "= = = = = = = = = = = = = = = = = = = = = = = = =" >> $LOG_MAIL
+echo "Conteudo do arquivo $NOME_ARQUIVO" >> $LOG_MAIL
+tar -tzf $NOME_ARQUIVO >> $LOG_MAIL
+echo " "
+
 
 # Envia email com conteúdo do arquivo de log
 ASSUNTO="Backup realizado no servidor $NOME_SERVIDOR em $(date +%F' '%T)"
