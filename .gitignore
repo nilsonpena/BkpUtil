@@ -1,0 +1,6 @@
+*.log
+*.conf
+*.inc
+*.list
+*.OLD
+*.gz
