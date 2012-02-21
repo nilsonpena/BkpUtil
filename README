@@ -2,3 +2,33 @@ Shell Script que automatiza backups para Linux
 
 Sistema Testado: CentOS 5.3
 
+Esse script faz um backup completo em cada mês (data.full.tar.gz) e um backup
+incremental a cada dia. A cada novo mês o arquivo full do mês anterior é salvo
+como arquivo morto (ano.mes.tar.gz.OLD). É possivel configurar a quantidade de
+arquivos .OLD que serão mantidos.
+
+É necessário ter o ssmt instalado para que o administrador seja avisado por email
+do andamento dos backups.
+
+UTILIZAÇÃO
+Renomeie os arquivo bkp.conf.samble, bkp.list.sample e bkp.excluded.list removendo
+a extensão .sample e mudando o nome bkp para algum nome que lhe lembre o que está
+sendo feito o backup, por ex.: MinhaMusicas.conf MeusDocs.conf
+
+Edite o arquivo .conf de acordo com as suas necessidades, todos os campos estão
+devidamente comentados.
+
+No arquivo .list coloque em cada linha os nomes dos diretórios/arquivos que deseja
+incluir no sistema de backup
+
+No arquivo .excluded.list coloque em cada linha os nomes dos diretórios/arquivos
+que deja que não sejam incluidos no backup
+
+O script deve ser iniciado como root e o arquivo .conf deve ser passado como 
+parâmetro ex.: sh bkputil.sh bkp.conf
+
+
+AGENDAMENTO
+Insira em /etc/crontab a execução do script em uma rotina diária, na hora que lhe for mais conveniente,
+ex.:  45 19 * * * root sh /home/meus_scripts/bkputil/bkputil.sh bkp.conf
+Dessa forma, em todos os dias do ano às 19:45 o script será iniciado
