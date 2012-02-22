@@ -5,7 +5,7 @@
 # 
 #         USAGE: ./bkputil.sh file.conf
 # 
-#   DESCRIPTION: 
+#   DESCRIPTION: Script que gerencia backup incremental com o TAR 
 # 
 #       OPTIONS: ---
 #  REQUIREMENTS: ---
@@ -44,7 +44,7 @@ QTD_CHAVES=${#CHAVES[*]}
         for ((i=0; i<"$QTD_CHAVES"; i++))
                 do
 			# Seta os valores vindos do arquivo de configuração nas variáveis que vão ser utilizadas no script
-                        eval ${CHAVES[$i]}=\"$(cat $CONFIG_FILE | egrep ^${CHAVES[$i]} | cut -f2 -d\")\"
+                        eval ${CHAVES[$i]}=\"$(cat $CONFIG_FILE | egrep ^${CHAVES[$i]}= | cut -f2 -d\")\"
                 done
 								
 # Seta o path do dispositivo de montagem do hd

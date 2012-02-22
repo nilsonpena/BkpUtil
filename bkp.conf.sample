@@ -10,7 +10,7 @@ HD="/mnt/hd_usb"
 # pelo script ao  mountar
 FSHD="ext3"
 
-# Dispositivo alocado para o HD
+# Nome (label) do HD externo utilizado para armazenar os backups
 LABEL_HD="nome_do_meu_hd"
 
 # Email do destinatário que receberá os emails
