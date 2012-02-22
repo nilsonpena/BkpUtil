@@ -369,13 +369,19 @@ HDPlugado
 HDMontado
 if [ ! $? -eq 0 ]
 	then
-		# Tenta montar o HD
-		ToLog "Tentando montar $DISPOSITIVO em $HD" 
-		umount $HD >> $LOG 
+		# Tenta desmontar e montar o HD
+		ToLog "Tentando desmontar o HD" 
+		umount $HD 2>> $LOG
+			if [ $? -eq 0 ]
+				then
+				ToLog "HD Desmontando."
+				else
+				ToLog "O HD aparentemente não estava montado. Vamos tentar montá-lo"
+			fi 
 		mount -t $FSHD $DISPOSITIVO $HD >> $LOG
 			if [ $? -eq 0 ]
 				then
-			echo "Consegui montar o HD pra você em $HD!!!" 
+			ToLog "HD montado com sucesso em $HD!!!" 
 				else
 					MSG="Falha ao tentar montar o HD $ID_HD em $HD. O Backup foi abortado"
 					ToLog "$MSG" 
