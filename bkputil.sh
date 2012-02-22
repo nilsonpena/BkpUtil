@@ -229,7 +229,7 @@ rm -fv $LOCAL_BACKUP/*inc* >> $LOG
 
 # Gera um backup FULL
 NOME_ARQUIVO="$PREFIXO_ARQUIVO.full.tar.gz"
-tar -zcp --totals --ignore-failed-read --exclude-from=$NAO_FAZER_BACKUP -g $CONTROLE_INCREMENTAL -f $NOME_ARQUIVO -T $LISTA_BACKUP
+tar -zcp --ignore-failed-read --exclude-from=$NAO_FAZER_BACKUP -g $CONTROLE_INCREMENTAL -f $NOME_ARQUIVO -T $LISTA_BACKUP
 ToLog "Criado arquivo de Backup $NOME_ARQUIVO" 
 
 # Cria arquivo .log e envia seu conteúdo para o email especificado
@@ -250,7 +250,7 @@ BackupIncremental() {
 
 # Gera um backup Incremental
 NOME_ARQUIVO="$PREFIXO_ARQUIVO.inc.tar.gz"
-tar -zcp --totals --ignore-failed-read --exclude-from=$NAO_FAZER_BACKUP -g $CONTROLE_INCREMENTAL -f $NOME_ARQUIVO -T $LISTA_BACKUP
+tar -zcp --ignore-failed-read --exclude-from=$NAO_FAZER_BACKUP -g $CONTROLE_INCREMENTAL -f $NOME_ARQUIVO -T $LISTA_BACKUP
 ToLog "Criado arquivo de Backup Incremental $NOME_ARQUIVO" 
 
 # Cria arquivo .log e envia seu conteúdo para o email especificado
@@ -322,11 +322,6 @@ MES_LOG=$(echo $DATA_LOG | cut -c 6-7)
 	fi
 done
 }
-
-
-
-
-
 
 # ======================================================================
 # Função que busca por todos os arquivos full.tar.gz e renomeia para
