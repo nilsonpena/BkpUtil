@@ -2,21 +2,27 @@ Shell Script que automatiza backups para Linux
 
 Sistema Testado: CentOS 5.3
 
-Esse script faz um backup completo em cada mês (data.full.tar.gz) e um backup
-incremental a cada dia. A cada novo mês o arquivo full do mês anterior é salvo
-como arquivo morto (ano.mes.tar.gz.OLD). É possivel configurar a quantidade de
+Esse script faz um backup completo há cada mês (AAAA-MM-DD.full.tar.gz) e um backup
+incremental (AAAA-MM-DD.inc.tar.gz) há cada dia. Há cada novo mês o arquivo full do mês anterior é salvo
+como arquivo morto (AAAA-MM.full.tar.gz.OLD). É possivel configurar a quantidade de
 arquivos .OLD que serão mantidos.
 
 É necessário ter o ssmt instalado para que o administrador seja avisado por email
 do andamento dos backups.
 
 UTILIZAÇÃO
-Renomeie os arquivo bkp.conf.samble, bkp.list.sample e bkp.excluded.list removendo
-a extensão .sample e mudando o nome bkp para algum nome que lhe lembre o que está
-sendo feito o backup, por ex.: MinhaMusicas.conf MeusDocs.conf
+Torne o arquivo bkputil.sh executável ex.: chmod +x bkputil.sh
+
+Renomeie os arquivo bkp.conf.samble, bkp.list.sample e bkp.excluded.list.sample, removendo
+a extensão .sample e se preferir  mude o nome bkp para algum nome que lhe lembre o que está
+sendo feito o backup, por ex.: MinhaMusicas.conf MeusDocs.conf. O nome do arquivo .conf
+será utilizado para identificar os logs.
 
 Edite o arquivo .conf de acordo com as suas necessidades, todos os campos estão
 devidamente comentados.
+
+No HD externo, crie uma pasta para receber os arquivos de backup, o nome dessa pasta será
+informado no arquivo .conf. Deve ser criada uma pasta para casa arquivo .conf utilizado
 
 No arquivo .list coloque em cada linha os nomes dos diretórios/arquivos que deseja
 incluir no sistema de backup

@@ -1,8 +1,25 @@
-#!/bin/sh
+#!/bin/bash - 
+#===============================================================================
+#
+#          FILE: bkputil.sh
+# 
+#         USAGE: ./bkputil.sh file.conf
+# 
+#   DESCRIPTION: 
+# 
+#       OPTIONS: ---
+#  REQUIREMENTS: ---
+#          BUGS: ---
+#         NOTES: ---
+#        AUTHOR: Nilson Pena (), nilsonpena@gmail.com
+#  ORGANIZATION: 
+#       CREATED: 22-02-2012 09:28:55 BRT
+#      REVISION:  ---
+#===============================================================================
 
-# by Nilson Pena <nilsonpena@gmail.com>
+set -o nounset                              # Treat unset variables as an error
 
-# Armazena o arquivo onde o script está salvo
+# Armazena o nome do arquivo onde o script está salvo
 DIR_SCRIPT=$(dirname $0)
 # Coloca o path no nome do arquivo passado como parâmetro
 CONFIG_FILE="$DIR_SCRIPT/$1"
@@ -164,7 +181,7 @@ if [ $? -eq 0 ]
 		fi 
 
 	else
-		ToLog "Pensei em desmontar o ponto de montagem $HD mas ele não estava montado" 
+		ToLog "Tentando  desmontar o ponto de montagem $HD mas ele não estava montado" 
 fi
 }
 # ======================================================================
@@ -250,7 +267,7 @@ BackupIncremental() {
 
 # Gera um backup Incremental
 NOME_ARQUIVO="$PREFIXO_ARQUIVO.inc.tar.gz"
-tar -zcp --ignore-failed-read --exclude-from=$NAO_FAZER_BACKUP -g $CONTROLE_INCREMENTAL -f $NOME_ARQUIVO -T $LISTA_BACKUP
+tar -czp --ignore-failed-read --exclude-from=$NAO_FAZER_BACKUP -g $CONTROLE_INCREMENTAL -f $NOME_ARQUIVO -T $LISTA_BACKUP
 ToLog "Criado arquivo de Backup Incremental $NOME_ARQUIVO" 
 
 # Cria arquivo .log e envia seu conteúdo para o email especificado
