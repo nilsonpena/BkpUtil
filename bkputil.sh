@@ -36,7 +36,7 @@ CONFIG_NAME=$(echo $1 | cut -f1 -d.)
 
 # Array que armazena os nomes das variáveis que vão ser buscadas no
 # arquivo de configuração
-CHAVES=( ID_HD HD FSHD DISPOSITIVO DESTINATARIO NOME_SERVIDOR LOCAL_BACKUP LISTA_BACKUP NAO_FAZER_BACKUP N_OLD )
+CHAVES=( ID_HD HD FSHD LABEL_HD DESTINATARIO NOME_SERVIDOR LOCAL_BACKUP LISTA_BACKUP NAO_FAZER_BACKUP N_OLD )
 
 # Armazena a quantidade de elementos existentes na array CHAVES
 QTD_CHAVES=${#CHAVES[*]}
@@ -46,6 +46,9 @@ QTD_CHAVES=${#CHAVES[*]}
 			# Seta os valores vindos do arquivo de configuração nas variáveis que vão ser utilizadas no script
                         eval ${CHAVES[$i]}=\"$(cat $CONFIG_FILE | egrep ^${CHAVES[$i]} | cut -f2 -d\")\"
                 done
+								
+# Seta o path do dispositivo de montagem do hd
+LABEL_HD="/dev/disk/by-label/$LABEL_HD"
 # Seta o local e o nome do arquivo de LOG.
 # No caso será no diretório do arquivo
 DIR_LOG="$DIR_SCRIPT/logs"
@@ -87,13 +90,13 @@ echo "$(date +%F' '%T) | $1" >> $LOG
 # o funcionamento do script existem
 # ======================================================================
 CheckInicial() {
-if [ -d $DIR_SCRIPT ] && [ -d $DIR_LOG ] && [ -e $LISTA_BACKUP ] && [ -e $NAO_FAZER_BACKUP ]  && [ -d $HD ] && [ -b $DISPOSITIVO ]
+if [ -d $DIR_SCRIPT ] && [ -d $DIR_LOG ] && [ -e $LISTA_BACKUP ] && [ -e $NAO_FAZER_BACKUP ]  && [ -d $HD ] && [ -b $LABEL_HD ]
 
 	then
 	ToLog "Encontrados os arquivos e diretórios essenciais para o script" 
 	return 0
 	else
-	MSG="ERRO! Algum(ns) arquivo(s) e diretório(s) não foi(ram) encontrado(s): $DIR_SCRIPT $DIR_LOG $LISTA_BACKUP $NAO_FAZER_BACKUP $HD $DISPOSITIVO. O Backup foi abortado"
+	MSG="ERRO! Algum(ns) arquivo(s) e diretório(s) não foi(ram) encontrado(s): $DIR_SCRIPT $DIR_LOG $LISTA_BACKUP $NAO_FAZER_BACKUP $HD $LABEL_HD. O Backup foi abortado"
 	ToLog "$MSG" 
 	EnviarEmail "ERRO: Backup abortado no servidor $NOME_SERVIDOR" "$MSG" 
 	exit
@@ -395,7 +398,7 @@ if [ ! $? -eq 0 ]
 				else
 				ToLog "O HD aparentemente não estava montado. Vamos tentar montá-lo"
 			fi 
-		mount -t $FSHD $DISPOSITIVO $HD >> $LOG
+		mount -t $FSHD $LABEL_HD $HD >> $LOG
 			if [ $? -eq 0 ]
 				then
 			ToLog "HD montado com sucesso em $HD!!!" 
