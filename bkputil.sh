@@ -8,7 +8,7 @@ DIR_SCRIPT=$(dirname $0)
 CONFIG_FILE="$DIR_SCRIPT/$1"
 
 # garante que o script foi inicializado com um parâmetro de configuração existente
-if [ ! -e $CONFIG_FILE ] || [ -n $1 ]
+if [ ! -e $CONFIG_FILE ] || [ -z $1 ]
 	then
 		echo "Parâmetro inexistente ou nulo. Backup abortado"			
 		exit
@@ -70,7 +70,8 @@ echo "$(date +%F' '%T) | $1" >> $LOG
 # o funcionamento do script existem
 # ======================================================================
 CheckInicial() {
-if [ -d $DIR_SCRIPT ] && [ -d $DIR_LOG ] && [ -e $LISTA_BACKUP ] && [ -e $NAO_FAZER_BACKUP ] && [ -d $HD ] && [ -d $DISPOSITIVO ]
+if [ -d $DIR_SCRIPT ] && [ -d $DIR_LOG ] && [ -e $LISTA_BACKUP ] && [ -e $NAO_FAZER_BACKUP ]  && [ -d $HD ] && [ -b $DISPOSITIVO ]
+
 	then
 	ToLog "Encontrados os arquivos e diretórios essenciais para o script" 
 	return 0
@@ -191,7 +192,7 @@ echo " "
 
 echo "= = = = = = = = = = = = = = = = = = = = = = = = = =" >> $LOG_MAIL
 echo "Conteudo do diretorio $LOCAL_BACKUP" >> $LOG_MAIL
-ls -Rlha $LOCAL_BACKUP >> $LOG_MAIL
+ls -RlhA $LOCAL_BACKUP >> $LOG_MAIL
 echo " "
 
 echo "= = = = = = = = = = = = = = = = = = = = = = = = =" >> $LOG_MAIL
@@ -254,6 +255,10 @@ ToLog "Criado arquivo de Backup Incremental $NOME_ARQUIVO"
 
 # Cria arquivo .log e envia seu conteúdo para o email especificado
 EmailLog $NOME_ARQUIVO
+
+# Desmonta o HD
+Desmonta
+
 }
 
 # ======================================================================
@@ -299,6 +304,34 @@ done
 # Função que busca por todos os arquivos full.tar.gz e renomeia para
 # com a data do mes passado e final full.tar.gz.OLD
 # ======================================================================
+ArquivaLogs() {
+
+# array com todos os arquivos de log encontrados no diretório
+ARQUIVOS_LOG=($(ls $DIR_LOG/ | egrep ^$CONFIG_NAME.[0-9]{4}-[0-9]{2}.log$))
+
+# Para cada arquivo .log dentro da array
+for A_LOG in ${ARQUIVOS_LOG[@]}
+do
+DATA_LOG=$(echo $A_LOG | cut -f2 -d.)
+MES_LOG=$(echo $DATA_LOG | cut -c 6-7)
+	if [ $MES_LOG -ne $MES ]
+		then
+			tar -czf $DIR_LOG/$A_LOG.tar.gz $DIR_LOG/$A_LOG
+			rm -f $DIR_LOG/$A_LOG
+			ToLog "Arquivo $A_LOG compactado"
+	fi
+done
+}
+
+
+
+
+
+
+# ======================================================================
+# Função que busca por todos os arquivos full.tar.gz e renomeia para
+# com a data do mes passado e final full.tar.gz.OLD
+# ======================================================================
 GeraOld() {
 
 # array com todos os arquivos FULL encontrados no diretório
@@ -308,7 +341,7 @@ ARQUIVOS_FULL=($(ls $LOCAL_BACKUP/ | egrep ^[0-9]{4}-[0-9]{2}-[0-9]{2}.*full.tar
 for FULL in ${ARQUIVOS_FULL[@]}
 do
 # Pega dez dígitos a partir do primeiro dígito do nome do arquivo
-# ou seja, a data. ex.: 2012-01-12i
+# ou seja, a data. ex.: 2012-01-12
 DATA_FULL=$(echo $FULL | cut -c 1-10)
 # Mes passado em relação a data no nome do arquivo no formato YYYY-MM
 MES_PASSADO=$(date --date "$DATA_FULL 1 months ago" +%Y-%m)
@@ -339,17 +372,14 @@ HDPlugado
 
 # Checa se o HD está montado, se não tiver tenta montá-lo
 HDMontado
-if [ $? -eq 0 ]
-	 then
-		ToLog "O  HD $DISPOSITIVO foi encontrado já montado" 
-	else
+if [ ! $? -eq 0 ]
+	then
 		# Tenta montar o HD
 		ToLog "Tentando montar $DISPOSITIVO em $HD" 
 		umount $HD >> $LOG 
 		mount -t $FSHD $DISPOSITIVO $HD >> $LOG
 			if [ $? -eq 0 ]
 				then
-	
 			echo "Consegui montar o HD pra você em $HD!!!" 
 				else
 					MSG="Falha ao tentar montar o HD $ID_HD em $HD. O Backup foi abortado"
@@ -359,6 +389,8 @@ if [ $? -eq 0 ]
 			fi	
 		
 fi
+# Compacta os arquivos .logs que não são do mês atual
+ArquivaLogs
 
 # Verifica se é possível escrever no diretório onde será feito o backup
 CheckWrite $LOCAL_BACKUP
