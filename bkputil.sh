@@ -291,6 +291,15 @@ Desmonta
 # ======================================================================
 ApagaOld() {
 
+if [ -z  $(ls $LOCAL_BACKUP/ | egrep ^[0-9]{4}-[0-9]{2}.*full.tar.gz.OLD$) ]
+		then
+			ToLog "Não há arquivos OLD indicados para serem deletados"
+			return
+		else
+		# array com todos os arquivos OLD encontrados no diretório
+		ARQUIVOS_OLD=($(ls $LOCAL_BACKUP/ | egrep ^[0-9]{4}-[0-9]{2}.*full.tar.gz.OLD$))
+fi
+
 # array com todos os arquivos OLD encontrados no diretório
 ARQUIVOS_OLD=($(ls $LOCAL_BACKUP/ | egrep ^[0-9]{4}-[0-9]{2}.*full.tar.gz.OLD$))
 
@@ -326,6 +335,15 @@ done
 # ======================================================================
 ArquivaLogs() {
 
+if [ -z  $(ls $DIR_LOG/ | egrep ^$CONFIG_NAME.[0-9]{4}-[0-9]{2}.log$) ]
+		then
+			ToLog "Não há arquivos .log indicados para arquivamento"
+			return
+		else
+			# array com todos os arquivos FULL encontrados no diretório
+			ARQUIVOS_LOG=($(ls $DIR_LOG/ | egrep ^$CONFIG_NAME.[0-9]{4}-[0-9]{2}.log$))
+fi
+
 # array com todos os arquivos de log encontrados no diretório
 ARQUIVOS_LOG=($(ls $DIR_LOG/ | egrep ^$CONFIG_NAME.[0-9]{4}-[0-9]{2}.log$))
 
@@ -349,8 +367,16 @@ done
 # ======================================================================
 GeraOld() {
 
-# array com todos os arquivos FULL encontrados no diretório
-ARQUIVOS_FULL=($(ls $LOCAL_BACKUP/ | egrep ^[0-9]{4}-[0-9]{2}-[0-9]{2}.*full.tar.gz$))
+
+if [ -z  $(ls $LOCAL_BACKUP/ | egrep ^[0-9]{4}-[0-9]{2}-[0-9]{2}.*full.tar.gz$) ]
+		then
+			ToLog "Não há arquivos indicados para arquivamento (OLD)"
+			return
+		else
+			# array com todos os arquivos FULL encontrados no diretório
+			ARQUIVOS_FULL=($(ls $LOCAL_BACKUP/ | egrep ^[0-9]{4}-[0-9]{2}-[0-9]{2}.*full.tar.gz$))
+fi
+
 
 # Para cada arquivo FULL dentro da array
 for FULL in ${ARQUIVOS_FULL[@]}

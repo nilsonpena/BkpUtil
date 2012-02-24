@@ -38,3 +38,15 @@ AGENDAMENTO
 Insira em /etc/crontab a execução do script em uma rotina diária, na hora que lhe for mais conveniente,
 ex.:  45 19 * * * root sh /home/meus_scripts/bkputil/bkputil.sh bkp.conf
 Dessa forma, em todos os dias do ano às 19:45 o script será iniciado
+
+
+A linha do crontab é dividida em 6 campos
+*	*	*	*	*	USUARIO COMANDO
+Campo 	Função
+1o. 	Minuto (0-59)
+2o. 	Hora (0-23)
+3o. 	Dia do mês (1-31) 
+4o. 	Mês (1-12)
+5o. 	Dia da semana (0-6, onde 0 é domingo)
+6o. 	USUARIO COMANDO para execução
+
