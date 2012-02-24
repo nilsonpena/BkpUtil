@@ -197,7 +197,6 @@ fi
 # ======================================================================
 EmailLog() {
 
-NOME_ARQUIVO=$1
 ToLog "Removendo logs antigos de emails enviados"
 rm -f $DIR_LOG/$CONFIG_NAME.mail* >> $LOG
 
@@ -214,12 +213,6 @@ echo "= = = = = = = = = = = = = = = = = = = = = = = = = =" >> $LOG_MAIL
 echo "Conteudo do diretorio $LOCAL_BACKUP" >> $LOG_MAIL
 ls -RlhA $LOCAL_BACKUP >> $LOG_MAIL
 echo " "
-
-echo "= = = = = = = = = = = = = = = = = = = = = = = = =" >> $LOG_MAIL
-echo "Conteudo do arquivo $NOME_ARQUIVO" >> $LOG_MAIL
-tar -tzf $NOME_ARQUIVO >> $LOG_MAIL
-echo " "
-
 
 # Envia email com conteúdo do arquivo de log
 ASSUNTO="Backup realizado no servidor $NOME_SERVIDOR em $(date +%F' '%T)"
@@ -253,7 +246,7 @@ tar -zcp --ignore-failed-read --exclude-from=$NAO_FAZER_BACKUP -g $CONTROLE_INCR
 ToLog "Criado arquivo de Backup $NOME_ARQUIVO" 
 
 # Cria arquivo .log e envia seu conteúdo para o email especificado
-EmailLog $NOME_ARQUIVO
+EmailLog
 
 # Desmonta o HD
 Desmonta
