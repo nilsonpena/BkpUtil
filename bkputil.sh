@@ -233,15 +233,15 @@ ToLog "Email enviado para: $DESTINATARIO assunto: $ASSUNTO"
 BackupFull(){
 # Remove o arquivo de controle incremental que será criado automaticamente
 # durante o backup full
-ToLog "Removido arquivo $CONTROLE_INCREMENTAL" 
 rm -fv $CONTROLE_INCREMENTAL >> $LOG
+ToLog "Removido arquivo $CONTROLE_INCREMENTAL" 
 
 # Remove todos os arquivos incrementais
+rm -fv $LOCAL_BACKUP/*$CONFIG_NAME.inc* >> $LOG
 ToLog "Removendo os arquivos incrementais abaixo do diretório $LOCAL_BACKUP" 
-rm -fv $LOCAL_BACKUP/*inc* >> $LOG
 
 # Gera um backup FULL
-NOME_ARQUIVO="$PREFIXO_ARQUIVO.full.tar.gz"
+NOME_ARQUIVO="$PREFIXO_ARQUIVO.$CONFIG_NAME.full.tar.gz"
 tar -zcp --ignore-failed-read --exclude-from=$NAO_FAZER_BACKUP -g $CONTROLE_INCREMENTAL -f $NOME_ARQUIVO -T $LISTA_BACKUP
 ToLog "Criado arquivo de Backup $NOME_ARQUIVO" 
 
@@ -262,12 +262,12 @@ Desmonta
 BackupIncremental() {
 
 # Gera um backup Incremental
-NOME_ARQUIVO="$PREFIXO_ARQUIVO.inc.tar.gz"
+NOME_ARQUIVO="$PREFIXO_ARQUIVO.$CONFIG_NAME.inc.tar.gz"
 tar -czp --ignore-failed-read --exclude-from=$NAO_FAZER_BACKUP -g $CONTROLE_INCREMENTAL -f $NOME_ARQUIVO -T $LISTA_BACKUP
 ToLog "Criado arquivo de Backup Incremental $NOME_ARQUIVO" 
 
 # Cria arquivo .log e envia seu conteúdo para o email especificado
-EmailLog $NOME_ARQUIVO
+EmailLog
 
 # Desmonta o HD
 Desmonta
@@ -284,17 +284,17 @@ Desmonta
 # ======================================================================
 ApagaOld() {
 
-if [ -z  $(ls $LOCAL_BACKUP/ | egrep ^[0-9]{4}-[0-9]{2}.*full.tar.gz.OLD$) ]
+if [ -z  $(ls $LOCAL_BACKUP/ | egrep ^[0-9]{4}-[0-9]{2}.*$CONFIG_NAME.full.tar.gz.OLD$) ]
 		then
-			ToLog "Não há arquivos OLD indicados para serem deletados"
+			ToLog "Não há arquivos AAAA-MM.$CONFIG_NAME.full.tar.gz.OLD em $LOCAL_BACKUP"
 			return
 		else
 		# array com todos os arquivos OLD encontrados no diretório
-		ARQUIVOS_OLD=($(ls $LOCAL_BACKUP/ | egrep ^[0-9]{4}-[0-9]{2}.*full.tar.gz.OLD$))
+		ARQUIVOS_OLD=($(ls $LOCAL_BACKUP/ | egrep ^[0-9]{4}-[0-9]{2}.*$CONFIG_NAME.full.tar.gz.OLD$))
 fi
 
 # array com todos os arquivos OLD encontrados no diretório
-ARQUIVOS_OLD=($(ls $LOCAL_BACKUP/ | egrep ^[0-9]{4}-[0-9]{2}.*full.tar.gz.OLD$))
+ARQUIVOS_OLD=($(ls $LOCAL_BACKUP/ | egrep ^[0-9]{4}-[0-9]{2}.*$CONFIG_NAME.full.tar.gz.OLD$))
 
 for OLD in ${ARQUIVOS_OLD[@]}
 do
@@ -323,8 +323,8 @@ done
 
 
 # ======================================================================
-# Função que busca por todos os arquivos full.tar.gz e renomeia para
-# com a data do mes passado e final full.tar.gz.OLD
+# Arquivamento dos logs
+# 
 # ======================================================================
 ArquivaLogs() {
 
@@ -355,19 +355,19 @@ done
 }
 
 # ======================================================================
-# Função que busca por todos os arquivos full.tar.gz e renomeia para
+# Função que busca por todos os arquivos full.tar.gz e renomeia
 # com a data do mes passado e final full.tar.gz.OLD
 # ======================================================================
 GeraOld() {
 
 
-if [ -z  $(ls $LOCAL_BACKUP/ | egrep ^[0-9]{4}-[0-9]{2}-[0-9]{2}.*full.tar.gz$) ]
+if [ -z  $(ls $LOCAL_BACKUP/ | egrep ^[0-9]{4}-[0-9]{2}-[0-9]{2}.*$CONFIG_NAME.full.tar.gz$) ]
 		then
 			ToLog "Não há arquivos indicados para arquivamento (OLD)"
 			return
 		else
 			# array com todos os arquivos FULL encontrados no diretório
-			ARQUIVOS_FULL=($(ls $LOCAL_BACKUP/ | egrep ^[0-9]{4}-[0-9]{2}-[0-9]{2}.*full.tar.gz$))
+			ARQUIVOS_FULL=($(ls $LOCAL_BACKUP/ | egrep ^[0-9]{4}-[0-9]{2}-[0-9]{2}.*$CONFIG_NAME.full.tar.gz$))
 fi
 
 
@@ -380,8 +380,8 @@ DATA_FULL=$(echo $FULL | cut -c 1-10)
 # Mes passado em relação a data no nome do arquivo no formato YYYY-MM
 MES_PASSADO=$(date --date "$DATA_FULL 1 months ago" +%Y-%m)
 
-        mv $LOCAL_BACKUP/$FULL $LOCAL_BACKUP/$MES_PASSADO.full.tar.gz.OLD 2>> $LOG
-	ToLog "Criado arquivo Morto $MES_PASSADO.full.tar.gz.OLD" 
+        mv $LOCAL_BACKUP/$FULL $LOCAL_BACKUP/$MES_PASSADO.$CONFIG_NAME.full.tar.gz.OLD 2>> $LOG
+	ToLog "Criado arquivo Morto $MES_PASSADO.$CONFIG_NAME.full.tar.gz.OLD" 
 	
 done
 	MSG="Arquivo(s) morto(s) existente(s): $(ls $LOCAL_BACKUP | grep .*tar.gz.OLD)"
@@ -448,7 +448,7 @@ fi
 # se não existir faz um backup full caso contrário faz
 # backup incremental
 MES_ATUAL=$(date +%m)
-FULL=$(ls $LOCAL_BACKUP/ | egrep ^[0-9]{4}-$MES_ATUAL-[0-9]{2}.*full.tar.gz$)
+FULL=$(ls $LOCAL_BACKUP/ | egrep ^[0-9]{4}-$MES_ATUAL-[0-9]{2}.*$CONFIG_NAME.full.tar.gz$)
 
 if [ -z $FULL ]
 # Se $FULL for vazia
