@@ -19,11 +19,6 @@ DESTINATARIO="meu@email.com"
 # Nome do Servidor
 NOME_SERVIDOR="MeuServidor"
 
-# Nome do diretório onde serão armazenados os backups no HD externo
-# É necessário criá-lo manualmente na raiz do HD ex.: "mkdir /mnt/hd_usb/backup"
-# o nome dessa pasta deve ser única para cada arquivo .conf que você possuir
-LOCAL_BACKUP="backup"
-
 # Arquivo com a lista de diretórios/arquivos para backup
 # Esse arquivo deve ser criado dentro da pasta principal do script
 LISTA_BACKUP="bkp.list"

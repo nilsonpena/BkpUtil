@@ -19,9 +19,11 @@
 
 set -o nounset                              # Treat unset variables as an error
 
-# Armazena o nome do arquivo onde o script está salvo
+# Armazena o path do script
 DIR_SCRIPT=$(dirname $0)
-# Coloca o path no nome do arquivo passado como parâmetro
+# Coloca o path do script no nome do arquivo passado como parâmetro
+# isso leva em consideração que o arquivo .conf tem que ser salvo no
+# no mesmo local do script
 CONFIG_FILE="$DIR_SCRIPT/$1"
 
 # garante que o script foi inicializado com um parâmetro de configuração existente
@@ -36,7 +38,7 @@ CONFIG_NAME=$(echo $1 | cut -f1 -d.)
 
 # Array que armazena os nomes das variáveis que vão ser buscadas no
 # arquivo de configuração
-CHAVES=( ID_HD HD FSHD LABEL_HD DESTINATARIO NOME_SERVIDOR LOCAL_BACKUP LISTA_BACKUP NAO_FAZER_BACKUP N_OLD )
+CHAVES=( ID_HD HD FSHD LABEL_HD DESTINATARIO NOME_SERVIDOR LISTA_BACKUP NAO_FAZER_BACKUP N_OLD )
 
 # Armazena a quantidade de elementos existentes na array CHAVES
 QTD_CHAVES=${#CHAVES[*]}
@@ -64,7 +66,7 @@ LISTA_BACKUP="$DIR_SCRIPT/$LISTA_BACKUP"
 # na pasta do script
 NAO_FAZER_BACKUP="$DIR_SCRIPT/$NAO_FAZER_BACKUP"
 # Coloca path da pasta onde será armazenado o backup a raíz do HD USB
-LOCAL_BACKUP="$HD/$LOCAL_BACKUP"
+LOCAL_BACKUP="$HD/$CONFIG_NAME"
 # Seta o prefixo e path que será concatenado com os arquivos .full.tar.gz e inc.tar.gz
 PREFIXO_ARQUIVO="$LOCAL_BACKUP/$(date +%Y-%m-%d_%A)"
 # Ano atual com 4 dígitos
@@ -242,7 +244,7 @@ ToLog "Removendo os arquivos incrementais abaixo do diretório $LOCAL_BACKUP"
 
 # Gera um backup FULL
 NOME_ARQUIVO="$PREFIXO_ARQUIVO.$CONFIG_NAME.full.tar.gz"
-tar -zcp --ignore-failed-read --exclude-from=$NAO_FAZER_BACKUP -g $CONTROLE_INCREMENTAL -f $NOME_ARQUIVO -T $LISTA_BACKUP
+tar -czp --ignore-failed-read --exclude-from=$NAO_FAZER_BACKUP -g $CONTROLE_INCREMENTAL -f $NOME_ARQUIVO -T $LISTA_BACKUP
 ToLog "Criado arquivo de Backup $NOME_ARQUIVO" 
 
 # Cria arquivo .log e envia seu conteúdo para o email especificado
@@ -423,6 +425,23 @@ fi
 # Compacta os arquivos .logs que não são do mês atual
 ArquivaLogs
 
+# Verifica se o diretório que receberá os backups existe, se existir
+# tenta criar
+if [ ! -d $LOCAL_BACKUP ]
+	then
+		ToLog "Não foi encontrado $LOCAL_BACKUP em $HD. Tentarei criá-lo para você"
+		mkdir $LOCAL_BACKUP 2>> $LOG
+			if [ $? -eq 0 ]
+				then 
+					ToLog "Foi criado o diretório $LOCAL_BACKUP em $HD"
+				else
+					MSG="Não foi possível criar o diretório $LOCAL_BACKUP em $HD. O backup será abortado"
+					ToLog "$MSG"
+					EnviarEmail "ERRO: Backup abortado no Servidor $NOME_SERVIDOR" "$MSG"
+					exit
+
+			fi
+fi
 # Verifica se é possível escrever no diretório onde será feito o backup
 CheckWrite $LOCAL_BACKUP
 if [ $? -eq 0 ]
@@ -469,4 +488,3 @@ if [ $(ls $LOCAL_BACKUP/ | egrep -c ^[0-9]{4}-$MES_ATUAL-[0-9]{2}.*$CONFIG_NAME.
 		ToLog "O Backup Incremental não foi realizado" 
 			fi
 fi
-
