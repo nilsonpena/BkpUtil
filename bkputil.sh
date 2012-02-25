@@ -284,7 +284,7 @@ Desmonta
 # ======================================================================
 ApagaOld() {
 
-if [ -z  $(ls $LOCAL_BACKUP/ | egrep ^[0-9]{4}-[0-9]{2}.*$CONFIG_NAME.full.tar.gz.OLD$) ]
+if [ $(ls $LOCAL_BACKUP/ | egrep -c ^[0-9]{4}-[0-9]{2}.*$CONFIG_NAME.full.tar.gz.OLD$) -eq 0 ]
 		then
 			ToLog "Não há arquivos AAAA-MM.$CONFIG_NAME.full.tar.gz.OLD em $LOCAL_BACKUP"
 			return
@@ -292,9 +292,6 @@ if [ -z  $(ls $LOCAL_BACKUP/ | egrep ^[0-9]{4}-[0-9]{2}.*$CONFIG_NAME.full.tar.g
 		# array com todos os arquivos OLD encontrados no diretório
 		ARQUIVOS_OLD=($(ls $LOCAL_BACKUP/ | egrep ^[0-9]{4}-[0-9]{2}.*$CONFIG_NAME.full.tar.gz.OLD$))
 fi
-
-# array com todos os arquivos OLD encontrados no diretório
-ARQUIVOS_OLD=($(ls $LOCAL_BACKUP/ | egrep ^[0-9]{4}-[0-9]{2}.*$CONFIG_NAME.full.tar.gz.OLD$))
 
 for OLD in ${ARQUIVOS_OLD[@]}
 do
@@ -312,11 +309,8 @@ DIFF=$(($DIFF_ANO + $DIFF_MES))
 		then
 	ToLog "Removido o arquivo $OLD pois é muito antigo de acordo com as configurações" 
         rm -f $LOCAL_BACKUP/$OLD >> $LOG
-	
 	fi
 done
-
-
 }
 # ======================================================================
 # ======================================================================
@@ -328,7 +322,7 @@ done
 # ======================================================================
 ArquivaLogs() {
 
-if [ -z  $(ls $DIR_LOG/ | egrep ^$CONFIG_NAME.[0-9]{4}-[0-9]{2}.log$) ]
+if [ $(ls $DIR_LOG/ | egrep -c ^$CONFIG_NAME.[0-9]{4}-[0-9]{2}.log$) -eq 0 ]
 		then
 			ToLog "Não há arquivos .log indicados para arquivamento"
 			return
@@ -336,9 +330,6 @@ if [ -z  $(ls $DIR_LOG/ | egrep ^$CONFIG_NAME.[0-9]{4}-[0-9]{2}.log$) ]
 			# array com todos os arquivos FULL encontrados no diretório
 			ARQUIVOS_LOG=($(ls $DIR_LOG/ | egrep ^$CONFIG_NAME.[0-9]{4}-[0-9]{2}.log$))
 fi
-
-# array com todos os arquivos de log encontrados no diretório
-ARQUIVOS_LOG=($(ls $DIR_LOG/ | egrep ^$CONFIG_NAME.[0-9]{4}-[0-9]{2}.log$))
 
 # Para cada arquivo .log dentro da array
 for A_LOG in ${ARQUIVOS_LOG[@]}
@@ -361,7 +352,7 @@ done
 GeraOld() {
 
 
-if [ -z  $(ls $LOCAL_BACKUP/ | egrep ^[0-9]{4}-[0-9]{2}-[0-9]{2}.*$CONFIG_NAME.full.tar.gz$) ]
+if [ $(ls $LOCAL_BACKUP/ | egrep -c ^[0-9]{4}-[0-9]{2}-[0-9]{2}.*$CONFIG_NAME.full.tar.gz$) -eq 0 ]
 		then
 			ToLog "Não há arquivos indicados para arquivamento (OLD)"
 			return
@@ -448,10 +439,9 @@ fi
 # se não existir faz um backup full caso contrário faz
 # backup incremental
 MES_ATUAL=$(date +%m)
-FULL=$(ls $LOCAL_BACKUP/ | egrep ^[0-9]{4}-$MES_ATUAL-[0-9]{2}.*$CONFIG_NAME.full.tar.gz$)
 
-if [ -z $FULL ]
-# Se $FULL for vazia
+if [ $(ls $LOCAL_BACKUP/ | egrep -c ^[0-9]{4}-$MES_ATUAL-[0-9]{2}.*$CONFIG_NAME.full.tar.gz$) -eq 0 ]
+	# Se não existir FULL do mês atual
         then
 		# Antes de executar o FULL do mes atual vamos renomear todos os full.tar.gz existentes
 		# para arquivos mes_passado.full.tar.gz.OLD	
