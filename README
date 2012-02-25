@@ -18,21 +18,50 @@ a extensão .sample e se preferir  mude o nome bkp para algum nome que lhe lembr
 sendo feito o backup, por ex.: MinhaMusicas.conf MeusDocs.conf. O nome do arquivo .conf
 será utilizado para identificar os logs.
 
+o arquivo de configuração (.conf) deve ficar no mesmo local do bkputil.sh
+
 Edite o arquivo .conf de acordo com as suas necessidades, todos os campos estão
 devidamente comentados.
 
 No HD externo, crie uma pasta para receber os arquivos de backup, o nome dessa pasta será
-informado no arquivo .conf. Deve ser criada uma pasta para casa arquivo .conf utilizado
+informado no arquivo .conf, mais precisamente na variável LOCAL_BACKUP. Deve ser criada
+uma pasta para casa arquivo .conf utilizado.
+==========:TODO: Criar essa pasta dinâmicamente
 
-No arquivo .list coloque em cada linha os nomes dos diretórios/arquivos que deseja
-incluir no sistema de backup
+No arquivo .list coloque em cada linha os nomes completos dos diretórios/arquivos que deseja
+incluir no sistema de backup. Wildcards não são permitidos.
 
 No arquivo .excluded.list coloque em cada linha os nomes dos diretórios/arquivos
-que deja que não sejam incluidos no backup
+que deja que não sejam incluidos no backup. É possível utilizar padrões, como por
+ex.: *.mp3 irá deixar todos os arquivos que terminam com .mp3 fora do backup.
 
-O script deve ser iniciado como root e o arquivo .conf deve ser passado como 
+O script deve ser iniciado como root e o nome do arquivo .conf deve ser passado como 
 parâmetro ex.: sh bkputil.sh bkp.conf
 
+BACKUP FULL
+É o backup completo que é gerado todo mês. Assim que o script detecta que o mês mudou e não existe um arquivo full.tar.gz no diretório de backup, ele se encarrega de
+criar um novo arquivo FULL e arquivar os antigos de acordo com a política determinada no arquivo .conf.
+
+O comando utilizado é:
+tar -czp --ignore-failed-read --exclude-from=CONF_NAME.excluded.list -g CONF_NAME.inc -f AAAA-MM-DD_DIA_DA_SEMANA.CONF_NAME.full.tar.gz -T $CONF_NAME.list
+NOTA: os arquivos CONF_NAME.excluded.list, CONF_NAME.list devem ser criados pelo próprio usuário, com o nome que lhe for mais conveniente no lugar de "CONF_NAME"
+e devidamente informados no arquivo .conf
+
+As opções utilizadas no comando tar na hora de criar um backup FULL são:
+-c = Cria um arquivo
+-z = Compacta o arquivo
+-p = Mantém as permissões dos arquivos
+--ignore-failed-read = Continua o backup mesmo que seja encontrado um arquivo inlegível
+--exlude-from = Lê um arquivo com a lista de diretórios/arquivos ou padrões que devem ficar fora do backup
+-g = Informa um arquivo que deve ser utilizado como controle do backup incremental
+-f = Informa o nome do arquivo que será gerado após o backup
+-T = informa o nome do arquivo que comtém a lista de diretórios que devem ser incluídos no backup
+
+BACKUP INCREMENTAL
+O backup incremental é feito diariamente e o comando utilizado é o mesmo do backup FULL. a única diferença está no nome do arquivo que passa
+a ter a palavra "inc" no lugar da "full".
+
+Toda vez que um backup full é gerado, todos os backups inc são apagados previamente.
 
 AGENDAMENTO
 Insira em /etc/crontab a execução do script em uma rotina diária, na hora que lhe for mais conveniente,
