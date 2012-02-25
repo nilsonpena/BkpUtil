@@ -33,6 +33,10 @@ LISTA_BACKUP="bkp.list"
 # Ele deve ser criado dentro da pasta do script
 NAO_FAZER_BACKUP="bkp.excluded.list"
 
-# Quantidade de arquivos (meses) mortos (OLD) que devem 
-# ser armazenados
+# Quantidade de meses que devem ser salvos em backup 
+# Ex.: Um arquivo full.tar.gz possui informações do
+# mes imediatamente anterior. Se essa variável for
+# setada para um número superior a 1, automaticamente
+# o script irá armazenar os arquivos FULL antigos como
+# AAAA-MM.CONF_NAME.full.tar.gz.OLD
 N_OLD="2"
