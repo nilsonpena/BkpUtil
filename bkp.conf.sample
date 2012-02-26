@@ -1,17 +1,13 @@
-# Nome com que o HD é reconhecido com o comando lsusb
-# digite lsusb como root e procure pelo seu HD
-ID_HD="Seagate RSS LLC FreeAgent GoFlex USB 2.0"
-
 # Ponto de montagem do HD Externo. Se for ocaso você deve
+# Nome (label) do HD externo utilizado para armazenar os backups
+LABEL_HD="nome_do_meu_hd"
+
 # criá-lo previamente ex.: "mkdir /mnt/hd_usb"
 HD="/mnt/hd_usb"
 
 # Sistema de arquivo utilizado pelo HD. Essa informação será utilizada
 # pelo script ao  mountar
 FSHD="ext3"
-
-# Nome (label) do HD externo utilizado para armazenar os backups
-LABEL_HD="nome_do_meu_hd"
 
 # Email do destinatário que receberá os emails
 DESTINATARIO="meu@email.com"

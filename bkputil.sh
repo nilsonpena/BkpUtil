@@ -20,7 +20,9 @@
 set -o nounset                              # Treat unset variables as an error
 
 # Testa a existência de parâmetros na inicialização do script
-if [ "$@" == ""]
+#echo $@
+#exit
+if [ "$@" == "" ]
 then
 	echo "ERRO!!! É necessários informar o nome do arquivo de configuração como parâmetro. Backup Abortado"
 	exit
@@ -45,7 +47,7 @@ CONFIG_NAME=$(echo $1 | cut -f1 -d.)
 
 # Array que armazena os nomes das variáveis que vão ser buscadas no
 # arquivo de configuração
-CHAVES=( ID_HD HD FSHD LABEL_HD DESTINATARIO NOME_SERVIDOR LISTA_BACKUP NAO_FAZER_BACKUP N_OLD )
+CHAVES=( HD FSHD LABEL_HD DESTINATARIO NOME_SERVIDOR LISTA_BACKUP NAO_FAZER_BACKUP N_OLD )
 
 # Armazena a quantidade de elementos existentes na array CHAVES
 QTD_CHAVES=${#CHAVES[*]}
@@ -57,7 +59,7 @@ QTD_CHAVES=${#CHAVES[*]}
                 done
 								
 # Seta o path do dispositivo de montagem do hd
-LABEL_HD="/dev/disk/by-label/$LABEL_HD"
+PATH_HD="/dev/disk/by-label/$LABEL_HD"
 # Seta o local e o nome do arquivo de LOG.
 # No caso será no diretório do arquivo
 DIR_LOG="$DIR_SCRIPT/logs"
@@ -99,13 +101,13 @@ echo "$(date +%F' '%T) | $1" >> $LOG
 # o funcionamento do script existem
 # ======================================================================
 CheckInicial() {
-if [ -d $DIR_SCRIPT ] && [ -d $DIR_LOG ] && [ -e $LISTA_BACKUP ] && [ -e $NAO_FAZER_BACKUP ]  && [ -d $HD ] && [ -b $LABEL_HD ]
+if [ -d $DIR_SCRIPT ] && [ -d $DIR_LOG ] && [ -e $LISTA_BACKUP ] && [ -e $NAO_FAZER_BACKUP ]  && [ -d $HD ]
 
 	then
 	ToLog "Encontrados os arquivos e diretórios essenciais para o script" 
 	return 0
 	else
-	MSG="ERRO! Algum(ns) arquivo(s) e diretório(s) não foi(ram) encontrado(s): $DIR_SCRIPT $DIR_LOG $LISTA_BACKUP $NAO_FAZER_BACKUP $HD $LABEL_HD. O Backup foi abortado"
+	MSG="ERRO! Algum(ns) arquivo(s) e diretório(s) não foi(ram) encontrado(s): $DIR_SCRIPT $DIR_LOG $LISTA_BACKUP $NAO_FAZER_BACKUP $HD. O Backup foi abortado"
 	ToLog "$MSG" 
 	EnviarEmail "ERRO: Backup abortado no servidor $NOME_SERVIDOR" "$MSG" 
 	exit
@@ -138,24 +140,23 @@ ToLog "Email enviado para: $DESTINATARIO assunto: $ASSUNTO"
 # ======================================================================
 
 
-# ======================================================================
-# Função que checa se o HD está espetado na porta USB e manda email
-# caso não encontre o HD
-# ======================================================================
-HDPlugado(){
-BUSCA_HD=$(lsusb | grep "$ID_HD")
-if [ -n "$BUSCA_HD" ] 
-    then
-	ToLog "Encontrado o HD $ID_HD plugado em uma porta USB" 
-    else
-	MSG="O HD $ID_HD não está plugado em uma porta USB"
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  HDPlugado
+#   DESCRIPTION:  Checa a existência do link para HD na pasta /dev/disk/by-label
+#    PARAMETERS:  str Label
+#       RETURNS:  
+#-------------------------------------------------------------------------------
+HDPlugado() {
+if [ -L "$PATH_HD" ]
+then
+	ToLog "$LABEL_HD plugado! Encontrado o link em $PATH_HD"
+else
+	MSG="O HD $LABEL_HD não está plugado em uma porta USB"
 	ToLog "$MSG" 
 	EnviarEmail "ERRO: Backup abortado no servidor $NOME_SERVIDOR" "$MSG" 
 	exit
-fi
+fi	
 }
-# ======================================================================
-# ======================================================================
 
 
 # ======================================================================
@@ -165,10 +166,10 @@ HDMontado(){
  mount | grep -q "$HD"
 if [ $? -eq 0 ] 
     then
-    	ToLog "Foi encontrado o HD montado em $HD" 
+    	ToLog "Foi encontrado o HD $LABEL_HD  montado em $HD" 
 	return 0 
     else
-    	ToLog "O HD não está montado" 
+    	ToLog "O HD $LABEL_HD não está montado" 
 	return 1
 fi
 }
@@ -417,7 +418,7 @@ if [ ! $? -eq 0 ]
 				else
 				ToLog "O HD aparentemente não estava montado. Vamos tentar montá-lo"
 			fi 
-		mount -t $FSHD $LABEL_HD $HD >> $LOG
+		mount -t $FSHD $PATH_HD $HD >> $LOG
 			if [ $? -eq 0 ]
 				then
 			ToLog "HD montado com sucesso em $HD!!!" 
