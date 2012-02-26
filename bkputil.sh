@@ -47,7 +47,7 @@ CONFIG_NAME=$(echo $1 | cut -f1 -d.)
 
 # Array que armazena os nomes das variáveis que vão ser buscadas no
 # arquivo de configuração
-CHAVES=( HD FSHD LABEL_HD DESTINATARIO NOME_SERVIDOR LISTA_BACKUP NAO_FAZER_BACKUP N_OLD )
+CHAVES=( HD FSHD LABEL_HD DESTINATARIO LISTA_BACKUP NAO_FAZER_BACKUP N_OLD )
 
 # Armazena a quantidade de elementos existentes na array CHAVES
 QTD_CHAVES=${#CHAVES[*]}
@@ -78,6 +78,8 @@ LOCAL_BACKUP="$HD/$CONFIG_NAME"
 CONTROLE_INCREMENTAL="$LOCAL_BACKUP/$CONFIG_NAME.inc"
 # Seta o prefixo e path que será concatenado com os arquivos .full.tar.gz e inc.tar.gz
 PREFIXO_ARQUIVO="$LOCAL_BACKUP/$(date +%Y-%m-%d_%A)"
+# Nome do servidor
+NOME_SERVIDOR=$(hostname)
 # Ano atual com 4 dígitos
 ANO=$(date +%Y)
 # Mês atual com 2 dígitos

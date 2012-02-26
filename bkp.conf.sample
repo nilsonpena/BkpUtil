@@ -12,9 +12,6 @@ FSHD="ext3"
 # Email do destinatário que receberá os emails
 DESTINATARIO="meu@email.com"
 
-# Nome do Servidor
-NOME_SERVIDOR="MeuServidor"
-
 # Arquivo com a lista de diretórios/arquivos para backup
 # Esse arquivo deve ser criado dentro da pasta principal do script
 LISTA_BACKUP="bkp.list"
