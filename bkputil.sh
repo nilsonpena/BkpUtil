@@ -19,17 +19,24 @@
 
 set -o nounset                              # Treat unset variables as an error
 
+# Testa a existência de parâmetros na inicialização do script
+if [ "$@" == ""]
+then
+	echo "ERRO!!! É necessários informar o nome do arquivo de configuração como parâmetro. Backup Abortado"
+	exit
+fi
+
 # Armazena o path do script
 DIR_SCRIPT=$(dirname $0)
+
 # Coloca o path do script no nome do arquivo passado como parâmetro
-# isso leva em consideração que o arquivo .conf tem que ser salvo no
-# no mesmo local do script
+# isso obriga salvar o arquivo .conf no mesmo local do script.
 CONFIG_FILE="$DIR_SCRIPT/$1"
 
-# garante que o script foi inicializado com um parâmetro de configuração existente
-if [ ! -e $CONFIG_FILE ] || [ -z $1 ]
+# Testa a existência do arquivo de configuração dentro do diretório do script
+if [ ! -e $CONFIG_FILE ]
 	then
-		echo "Parâmetro inexistente ou nulo. Backup abortado"			
+		echo "ERRO!!! O arquivo de configuração $1 deve ficar no mesmo diretório do script. Backup abortado"			
 		exit
 fi
 
