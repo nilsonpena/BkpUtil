@@ -20,14 +20,11 @@
 set -o nounset                              # Treat unset variables as an error
 
 # Testa a existência de parâmetros na inicialização do script
-#echo $@
-#exit
-if [ "$@" == "" ]
+if [ "$*" = "" ]
 then
 	echo "ERRO!!! É necessários informar o nome do arquivo de configuração como parâmetro. Backup Abortado"
 	exit
 fi
-
 # Armazena o path do script
 DIR_SCRIPT=$(dirname $0)
 
@@ -60,8 +57,7 @@ QTD_CHAVES=${#CHAVES[*]}
 								
 # Seta o path do dispositivo de montagem do hd
 PATH_HD="/dev/disk/by-label/$LABEL_HD"
-# Seta o local e o nome do arquivo de LOG.
-# No caso será no diretório do arquivo
+# Seta o diretório do arquivo de LOG.
 DIR_LOG="$DIR_SCRIPT/logs"
 # O nome do arquivo de log será nome do arquivo .conf concatenado com YYYY-MM.log
 LOG="$DIR_LOG/$CONFIG_NAME.$(date +%Y-%m).log"
@@ -71,6 +67,7 @@ LISTA_BACKUP="$DIR_SCRIPT/$LISTA_BACKUP"
 # Coloca o path do arquivo .excluded.list como sendo o path do script, obrigando o usuário a salvar o arquivo
 # na pasta do script
 NAO_FAZER_BACKUP="$DIR_SCRIPT/$NAO_FAZER_BACKUP"
+# Seta o ponto de montagem do HD
 HD="/mnt/$LABEL_HD"
 # Coloca path da pasta onde será armazenado o backup a raíz do HD USB
 LOCAL_BACKUP="$HD/$CONFIG_NAME"
@@ -109,11 +106,13 @@ if [ -d $DIR_SCRIPT ] && [ -d $DIR_LOG ] && [ -e $LISTA_BACKUP ] && [ -e $NAO_FA
 	then
 	ToLog "Encontrados os arquivos e diretórios essenciais para o script" 
 	return 0
+
 	else
-	MSG="ERRO! Algum(ns) arquivo(s) e diretório(s) não foi(ram) encontrado(s): $DIR_SCRIPT $DIR_LOG $LISTA_BACKUP $NAO_FAZER_BACKUP $HD. O Backup foi abortado"
+	MSG="ERRO! Algum(ns) arquivo(s) e diretório(s) não foi(ram) encontrado(s): $DIR_SCRIPT $DIR_LOG $LISTA_BACKUP $NAO_FAZER_BACKUP. O Backup foi abortado"
 	ToLog "$MSG" 
 	EnviarEmail "ERRO: Backup abortado no servidor $NOME_SERVIDOR" "$MSG" 
 	exit
+
 fi
 }
 
@@ -123,16 +122,22 @@ fi
 CheckWrite() {
 touch "$1/write.test" 2>> $LOG
 if [ $? -eq 0 ] 
-    then
+    
+			then
     	rm -rf "$1/write.test" 2>> $LOG
-	return 0 
-    else
-	return 1
+			return 0 
+    	
+			else
+			return 1
 fi
 }
-# ======================================================================
-# Função que envia email
-# ======================================================================
+
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  EnviarEmail
+#   DESCRIPTION:  Envia email
+#    PARAMETERS:  $1 = Assunto e $2 = Corpo do email
+#       RETURNS:  
+#-------------------------------------------------------------------------------
 EnviarEmail() {
 ASSUNTO=$1
 CORPO=$2
@@ -140,7 +145,7 @@ CORPO=$2
 echo "$CORPO" | mail -s "$ASSUNTO" "$DESTINATARIO"
 ToLog "Email enviado para: $DESTINATARIO assunto: $ASSUNTO" 
 }
-# ======================================================================
+
 
 
 #---  FUNCTION  ----------------------------------------------------------------
@@ -150,10 +155,13 @@ ToLog "Email enviado para: $DESTINATARIO assunto: $ASSUNTO"
 #       RETURNS:  
 #-------------------------------------------------------------------------------
 HDPlugado() {
+	# Checa se existe um link simbólico com o label do HD no diretório /dev/disk/by-label/
 if [ -L "$PATH_HD" ]
-then
+
+	then
 	ToLog "$LABEL_HD plugado! Encontrado o link em $PATH_HD"
-else
+
+	else
 	MSG="O HD $LABEL_HD não está plugado em uma porta USB"
 	ToLog "$MSG" 
 	EnviarEmail "ERRO: Backup abortado no servidor $NOME_SERVIDOR" "$MSG" 
@@ -162,18 +170,25 @@ fi
 }
 
 
-# ======================================================================
-# Função que Checa se o HD está montado
-# ======================================================================
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  HDMontado
+#   DESCRIPTION:  Checa se o HD está montado
+#    PARAMETERS:  
+#       RETURNS:  0=HD montado 1=HD não montado
+#-------------------------------------------------------------------------------
 HDMontado(){
- mount | grep -q "$HD"
+ # busca pelo ponto de montagem na saída do comando mount	
+ # a opção -q (quiet) do grep faz com que o comando não emita saída
+mount | grep -q "$HD"
 if [ $? -eq 0 ] 
-then
+			
+			then
     	ToLog "Foi encontrado o HD $LABEL_HD montado em $HD" 
-				return 0 			
-else
+			return 0 			
+
+			else
     	ToLog "O HD $LABEL_HD não está montado" 
-				return 1
+			return 1
 fi
 }
 # ======================================================================
@@ -188,11 +203,13 @@ fi
 Monta() {
 mount -t $FSHD $PATH_HD $HD 2>> $LOG
 if [ $? -eq 0 ]
-then
-	# Se a montagem ocorrer cm sucesso exibe a mensagem no log
+	
+	then
+	# Se a montagem ocorrer com sucesso exibe a mensagem no log
 	ToLog "HD $LABEL_HD montado com sucesso em $HD!!!"
 	return 0
-else
+
+	else
 	#Caso contrário aborta o backup e manda email pro admin
 	MSG="Falha ao tentar montar o HD $LABEL_HD em $HD. O Backup foi abortado"
 	ToLog "$MSG"
@@ -201,43 +218,51 @@ else
 fi
 }
 
-# ======================================================================
-# Função que desmonta o HD
-# ======================================================================
 Desmonta() {
+	#---  FUNCTION  ----------------------------------------------------------------
+	#          NAME:  Desmonta
+	#   DESCRIPTION:  Monta o HD externo, criando ponto de montagem se necessário
+	#    PARAMETERS:  
+	#       RETURNS:  
+	#-------------------------------------------------------------------------------
 #se tiver montado desmonta
 HDMontado
 if [ $? -eq 0 ]
-	then
+	
+		then
 		umount $HD
-		if [ $? -eq 0  ]
-			then
+				if [ $? -eq 0  ]
+			
+				then
 				ToLog "O HD $LABEL_HD foi desmontado" 
 				rmdir $HD 2>> $LOG
-					if [ $? -eq 0 ]
-						then
+						
+							if [ $? -eq 0 ]
+							then
 							ToLog "Removido o diretório $HD"
-						else
+						
+							else
 							ToLog ">>> ATENÇÃO: Não foi possível remover o diretório $HD"
-					fi
-			else
+							fi
+			
+				else
 				ToLog ">>> ATENÇÃO: Não foi possível desmontar o HD $LABEL_HD montado em $HD"
-		fi 
+				fi 
 
-	else
+		else
 		ToLog "O HD $LABEL_HD já está desmontado" 
 fi
 }
-# ======================================================================
-# ======================================================================
 
 
 
-# ======================================================================
-# Função que gera e manda email com o log 
-# ======================================================================
+	#---  FUNCTION  ----------------------------------------------------------------
+	#          NAME:  EmailLog
+	#   DESCRIPTION:  Envia email com o resumo do log
+	#    PARAMETERS:  
+	#       RETURNS:  
+	#-------------------------------------------------------------------------------
 EmailLog() {
-
 ToLog "Removendo logs antigos de emails enviados"
 rm -f $DIR_LOG/$CONFIG_NAME.mail* >> $LOG
 
