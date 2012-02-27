@@ -2,9 +2,6 @@
 # Nome (label) do HD externo utilizado para armazenar os backups
 LABEL_HD="nome_do_meu_hd"
 
-# criá-lo previamente ex.: "mkdir /mnt/hd_usb"
-HD="/mnt/hd_usb"
-
 # Sistema de arquivo utilizado pelo HD. Essa informação será utilizada
 # pelo script ao  mountar
 FSHD="ext3"

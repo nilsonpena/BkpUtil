@@ -23,6 +23,8 @@ Observe que arquivo de configuração (.conf) deve ficar no mesmo local do bkput
 Edite o arquivo .conf de acordo com as suas necessidades, todos os campos estão
 devidamente comentados.
 
+O HD externo precisa ter um label e este precisa ser informado no arquivo de configuração(.conf).
+
 No arquivo .list coloque em cada linha os nomes completos dos diretórios/arquivos que deseja
 incluir no sistema de backup. Wildcards(* ? etc) não são permitidos.
 

@@ -47,7 +47,7 @@ CONFIG_NAME=$(echo $1 | cut -f1 -d.)
 
 # Array que armazena os nomes das variáveis que vão ser buscadas no
 # arquivo de configuração
-CHAVES=( HD FSHD LABEL_HD DESTINATARIO LISTA_BACKUP NAO_FAZER_BACKUP N_OLD )
+CHAVES=( FSHD LABEL_HD DESTINATARIO LISTA_BACKUP NAO_FAZER_BACKUP N_OLD )
 
 # Armazena a quantidade de elementos existentes na array CHAVES
 QTD_CHAVES=${#CHAVES[*]}
@@ -71,6 +71,7 @@ LISTA_BACKUP="$DIR_SCRIPT/$LISTA_BACKUP"
 # Coloca o path do arquivo .excluded.list como sendo o path do script, obrigando o usuário a salvar o arquivo
 # na pasta do script
 NAO_FAZER_BACKUP="$DIR_SCRIPT/$NAO_FAZER_BACKUP"
+HD="/mnt/$LABEL_HD"
 # Coloca path da pasta onde será armazenado o backup a raíz do HD USB
 LOCAL_BACKUP="$HD/$CONFIG_NAME"
 # Seta o nome e local do arquivo de controle incremental. Sera nome do .conf concatenado
@@ -103,7 +104,7 @@ echo "$(date +%F' '%T) | $1" >> $LOG
 # o funcionamento do script existem
 # ======================================================================
 CheckInicial() {
-if [ -d $DIR_SCRIPT ] && [ -d $DIR_LOG ] && [ -e $LISTA_BACKUP ] && [ -e $NAO_FAZER_BACKUP ]  && [ -d $HD ]
+if [ -d $DIR_SCRIPT ] && [ -d $DIR_LOG ] && [ -e $LISTA_BACKUP ] && [ -e $NAO_FAZER_BACKUP ]
 
 	then
 	ToLog "Encontrados os arquivos e diretórios essenciais para o script" 
@@ -167,18 +168,38 @@ fi
 HDMontado(){
  mount | grep -q "$HD"
 if [ $? -eq 0 ] 
-    then
-    	ToLog "Foi encontrado o HD $LABEL_HD  montado em $HD" 
-	return 0 
-    else
+then
+    	ToLog "Foi encontrado o HD $LABEL_HD montado em $HD" 
+				return 0 			
+else
     	ToLog "O HD $LABEL_HD não está montado" 
-	return 1
+				return 1
 fi
 }
 # ======================================================================
 # ======================================================================
 
-
+#---  FUNCTION  ----------------------------------------------------------------
+#          NAME:  Monta
+#   DESCRIPTION:  Monta o HD externo
+#    PARAMETERS:  
+#       RETURNS:  
+#-------------------------------------------------------------------------------
+Monta() {
+mount -t $FSHD $PATH_HD $HD 2>> $LOG
+if [ $? -eq 0 ]
+then
+	# Se a montagem ocorrer cm sucesso exibe a mensagem no log
+	ToLog "HD $LABEL_HD montado com sucesso em $HD!!!"
+	return 0
+else
+	#Caso contrário aborta o backup e manda email pro admin
+	MSG="Falha ao tentar montar o HD $LABEL_HD em $HD. O Backup foi abortado"
+	ToLog "$MSG"
+	EnviarEmail "ERRO: Backup abortado no Servidor $NOME_SERVIDOR"
+	exit
+fi
+}
 
 # ======================================================================
 # Função que desmonta o HD
@@ -188,15 +209,23 @@ Desmonta() {
 HDMontado
 if [ $? -eq 0 ]
 	then
-	umount $HD
+		umount $HD
 		if [ $? -eq 0  ]
 			then
-			ToLog "O ponto de montagen $HD foi desmontado" 
-			return 0
+				ToLog "O HD $LABEL_HD foi desmontado" 
+				rmdir $HD 2>> $LOG
+					if [ $? -eq 0 ]
+						then
+							ToLog "Removido o diretório $HD"
+						else
+							ToLog ">>> ATENÇÃO: Não foi possível remover o diretório $HD"
+					fi
+			else
+				ToLog ">>> ATENÇÃO: Não foi possível desmontar o HD $LABEL_HD montado em $HD"
 		fi 
 
 	else
-		ToLog "Tentando  desmontar o ponto de montagem $HD mas ele não estava montado" 
+		ToLog "O HD $LABEL_HD já está desmontado" 
 fi
 }
 # ======================================================================
@@ -400,7 +429,6 @@ done
 # Abre uma entrada no log
 ToLog "########## ROTINA DE BACKUP INICIADA ##########"
 
-
 # Checa se os arquivos e diretórios essenciais para script existem
 CheckInicial
 
@@ -411,26 +439,31 @@ HDPlugado
 HDMontado
 if [ ! $? -eq 0 ]
 	then
-		# Tenta desmontar e montar o HD
-		ToLog "Tentando desmontar o HD" 
-		umount $HD 2>> $LOG
-			if [ $? -eq 0 ]
-				then
-				ToLog "HD Desmontando."
+		# O HD não está montado
+				# Testa se o ponto de montagem existe
+				if [ -d "$HD" ]
+					then
+						# Ponto de montagem existe
+						ToLog "Encontrado o ponto de montagem $HD"
+						# Tenta montar o HD
+						Monta
 				else
-				ToLog "O HD aparentemente não estava montado. Vamos tentar montá-lo"
-			fi 
-		mount -t $FSHD $PATH_HD $HD >> $LOG
-			if [ $? -eq 0 ]
-				then
-			ToLog "HD montado com sucesso em $HD!!!" 
-				else
-					MSG="Falha ao tentar montar o HD $ID_HD em $HD. O Backup foi abortado"
-					ToLog "$MSG" 
-					EnviarEmail "ERRO: Backup abortado no Servidor $NOME_SERVIDOR" "$MSG"
-					exit
-			fi	
-		
+						# Ponto de montagem não encontrado
+						ToLog "O ponto de montagem $HD não existe, tentaremos criá-lo"			
+						mkdir -p $HD 2>> $LOG
+							if [ $? -eq 0 ]
+								then 
+									# Diretório do ponto de montagem criado	
+									ToLog "Criado diretório $HD que servirá como ponto de montagem para o HD externo"
+									# Tenta montar o HD
+									Monta
+								else
+									MSG="ERRO: Não foi possível criar o ponto de montagem em $HD. Backup abortado"
+									ToLog "$MSG"
+									EnviarEmail "ERRO: Backup abortado no servidor $NOME_SERVIDOR" "$MSG"
+									exit
+							fi		
+				fi	
 fi
 # Compacta os arquivos .logs que não são do mês atual
 ArquivaLogs
